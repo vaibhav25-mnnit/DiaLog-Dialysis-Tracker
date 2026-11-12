@@ -11,12 +11,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.dialysisdiary.ui.screens.AppTheme
-import com.example.dialysisdiary.ui.screens.DailyLogScreen
-import com.example.dialysisdiary.ui.screens.PlaceholderScreen
-import com.example.dialysisdiary.ui.screens.Screen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dialysisdiary.data.local.AppDatabase
+import com.example.dialysisdiary.data.local.DialysisSessionEntity
+import com.example.dialysisdiary.data.repository.DialysisSessionRepository
+import com.example.dialysisdiary.ui.screens.*
 import com.example.dialysisdiary.ui.theme.DialysisDiaryTheme
-import com.example.dialysisdiary.ui.screens.HomeScreen
+import com.example.dialysisdiary.ui.viewmodel.DialysisSessionViewModel
+import com.example.dialysisdiary.ui.viewmodel.DialysisSessionViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,20 +35,44 @@ class MainActivity : ComponentActivity() {
                     onDispose { }
                 }
 
+                val database = remember { AppDatabase.getDatabase(applicationContext) }
+                val repository = remember { DialysisSessionRepository(database.dialysisSessionDao()) }
+                val sessionViewModel: DialysisSessionViewModel = viewModel(
+                    factory = DialysisSessionViewModelFactory(repository)
+                )
+
                 var screen by remember { mutableStateOf(Screen.Home) }
+                var selectedSessionForDetail by remember { mutableStateOf<DialysisSessionEntity?>(null) }
                 BackHandler(enabled = screen != Screen.Home) { screen = Screen.Home }
 
                 when (screen) {
                     Screen.Home -> HomeScreen(
+                        viewModel = sessionViewModel,
                         onCheckIn = { screen = Screen.DailyLog },
+                        onNavigate = { screen = it },
+                        onSessionClick = {
+                            selectedSessionForDetail = it
+                            screen = Screen.SessionDetail
+                        }
+                    )
+                    Screen.Calendar -> CalendarScreen(
+                        viewModel = sessionViewModel,
+                        onNavigate = { screen = it }
+                    )
+                    Screen.Profile -> ProfileScreen(
                         onNavigate = { screen = it }
                     )
                     Screen.DailyLog -> DailyLogScreen(
+                        viewModel = sessionViewModel,
                         onNavigate = { screen = it },
                         onSaved = { screen = Screen.Home }
                     )
-                    Screen.Vitals -> PlaceholderScreen("Vitals & UF", Screen.Vitals) { screen = it }
-                    Screen.CareTeam -> PlaceholderScreen("Care Team", Screen.CareTeam) { screen = it }
+                    Screen.SessionDetail -> SessionDetailScreen(
+                        session = selectedSessionForDetail,
+                        viewModel = sessionViewModel,
+                        onBack = { screen = Screen.Home },
+                        onNavigate = { screen = it }
+                    )
                 }
             }
         }

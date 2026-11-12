@@ -1,7 +1,5 @@
 package com.example.dialysisdiary.ui.screens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -14,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-enum class Screen { Home, DailyLog, Vitals, CareTeam }
+enum class Screen { Home, Calendar, Profile, DailyLog, SessionDetail }
 
 // Global theme state: change this and every screen recomposes
 object AppTheme {
@@ -52,17 +50,7 @@ fun AppBottomBar(selected: Screen, onSelect: (Screen) -> Unit) {
     )
     NavigationBar(containerColor = UiCard) {
         NavigationBarItem(selected == Screen.Home, { onSelect(Screen.Home) }, { Icon(Icons.Default.Home, null) }, label = { Text("Home") }, colors = colors)
-        NavigationBarItem(selected == Screen.DailyLog, { onSelect(Screen.DailyLog) }, { Icon(Icons.Default.DateRange, null) }, label = { Text("Daily Log") }, colors = colors)
-        NavigationBarItem(selected == Screen.Vitals, { onSelect(Screen.Vitals) }, { Icon(Icons.Default.List, null) }, label = { Text("Vitals") }, colors = colors)
-        NavigationBarItem(selected == Screen.CareTeam, { onSelect(Screen.CareTeam) }, { Icon(Icons.Default.Person, null) }, label = { Text("Care Team") }, colors = colors)
-    }
-}
-
-@Composable
-fun PlaceholderScreen(title: String, selected: Screen, onSelect: (Screen) -> Unit) {
-    Scaffold(containerColor = UiBg, bottomBar = { AppBottomBar(selected, onSelect) }) { padding ->
-        Box(Modifier.padding(padding).padding(16.dp)) {
-            Text("$title (coming soon)", color = UiText)
-        }
+        NavigationBarItem(selected == Screen.Calendar, { onSelect(Screen.Calendar) }, { Icon(Icons.Default.DateRange, null) }, label = { Text("Calendar") }, colors = colors)
+        NavigationBarItem(selected == Screen.Profile, { onSelect(Screen.Profile) }, { Icon(Icons.Default.Person, null) }, label = { Text("Profile") }, colors = colors)
     }
 }
